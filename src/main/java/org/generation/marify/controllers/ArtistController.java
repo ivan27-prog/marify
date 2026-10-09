@@ -1,12 +1,15 @@
 package org.generation.marify.controllers;
 
+import jakarta.validation.Valid;
+import org.generation.marify.dtos.ArtistRequest;
 import org.generation.marify.models.Artist;
 import org.generation.marify.services.ArtistService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 /* 1. Indicar que es un controlador tipo rest (estamos haciendo una api rest)
@@ -28,4 +31,31 @@ public class ArtistController {
         return ResponseEntity.ok(artistsList);
     }
 
+    @GetMapping(path = "{artistId}") // http://localhost:8080/api/artist/id
+    public ResponseEntity<Artist> getArtistById(@PathVariable("artistId") Long id){
+        Artist artist = artistService.getArtistById(id);
+        return ResponseEntity.ok(artist);
+    }
+
+    @PostMapping
+    public ResponseEntity<Artist> createArtist(@Valid @RequestBody ArtistRequest artistRequest){
+        Artist artist = artistService.createArtist(artistRequest);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(artist.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(artist);
+    }
+
+    @DeleteMapping(path = "{artistId}") // http://localhost:8080/api/artist/id
+    public ResponseEntity<Artist> deleteArtist(@PathVariable("artistId") Long id){
+        Artist artist = artistService.getArtistById(id);
+        return ResponseEntity.ok(artist);
+    }
+
+    @PutMapping(path = "{artistId}")
+    public ResponseEntity<Artist> updateArtistById(@PathVariable("artistId") Long id, @RequestBody ArtistRequest artistRequest){
+        Artist artist = artistService.updateArtist(id, artistRequest);
+        return ResponseEntity.ok(artist);
+    }
 }
